@@ -1,5 +1,8 @@
 .env
+build/
+dist/
 database/
+node_modules/
 docker/mysql/
 docker/nginx/certs/*.crt
 docker/nginx/certs/*.key
