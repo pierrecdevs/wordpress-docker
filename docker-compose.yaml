@@ -1,0 +1,60 @@
+networks:
+  wordpressnet:
+
+services:
+ 
+  # Web Service
+  nginx:
+    build:
+      context: ./docker/nginx/
+      dockerfile: nginx.Dockerfile
+    container_name: ${APP_NAME}_nginx
+    depends_on:
+      - php
+      - mysql
+    volumes:
+      - ./app:/var/www/html:delegated
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/certs:/etc/nginx/ssl/certs
+    restart: always
+    ports: 
+      - "8080:80"
+      - "8443:443"
+    networks:
+      - wordpressnet
+
+  # PHP Env
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: php.Dockerfile
+    container_name: ${APP_NAME}_php
+    volumes:
+      - ./app:/var/www/html:delegated
+    working_dir: /var/www/html
+    env_file: .env
+    restart: always
+    ports:
+      - "9000:9000"
+    networks:
+      - wordpressnet
+
+  # Database service
+  # persistent storage.
+  mysql:
+    image: mariadb:latest
+    container_name: ${APP_NAME}_mysql
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: America/Toronto
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    ports:
+      - "3306:3306"
+    networks:
+      - wordpressnet
