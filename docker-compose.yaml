@@ -58,3 +58,13 @@ services:
       - "3306:3306"
     networks:
       - wordpressnet
+
+  # Composer.
+  composer:
+    image: composer:latest
+    container_name: ${APP_NAME}_composer
+    volumes:
+      - ./app:/var/www/html
+    working_dir: /var/www/html
+    networks:
+      - wordpressnet
